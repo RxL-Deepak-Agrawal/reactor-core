@@ -1,0 +1,58 @@
+# RxLogix: antora-playbook.yml without @springio/antora-extensions/latest-version-extension,
+# which only accepts X.Y.Z[-RCn|-Mn] versions and fails on 3.7.19-rxlogix-N. That extension
+# computes "latest version" links across published doc versions, irrelevant for internal builds.
+# Also reads the committed tree and disables "Edit this page" links (worktrees/edit_url: false).
+# Use with: ./gradlew -Pantora.playbook=antora-playbook-rx.yml ...
+antora:
+  extensions:
+    - '@springio/antora-extensions/partial-build-extension'
+    # atlas-extension must be before latest-version-extension so latest versions are applied to imported versions
+    - '@antora/atlas-extension'
+    - require: '@springio/antora-extensions/inject-collector-cache-config-extension'
+    - '@antora/collector-extension'
+    - id: pdf-extension # pdf-extension is enabled from antora-docs.gradle
+      require: '@antora/pdf-extension'
+      enabled: false
+    - require: '@springio/antora-extensions/root-component-extension'
+      root_component_name: 'reactor'
+site:
+  title: Reactor Core Reference Guide
+  url: https://projectreactor.io/docs/core/release/reference
+content:
+  sources:
+    - url: ./..
+      branches: HEAD
+      start_path: docs
+      # RxLogix: read the committed tree (not the working directory) and drop "Edit this page" links,
+      # otherwise local builds link every page to a file:// path on the build machine
+      worktrees: false
+      edit_url: false
+asciidoc:
+  extensions:
+    - '@asciidoctor/tabs'
+    - '@springio/asciidoctor-extensions'
+  attributes:
+    page-stackoverflow-url: https://stackoverflow.com/tags/project-reactor
+    page-pagination: ''
+    hide-uri-scheme: '@'
+    tabs-sync-option: '@'
+    chomp: 'all'
+    doctype: book
+    icons: font
+    toc2: true
+    sectnums: true
+    sectanchors: true
+    source-highlighter: highlightjs
+    highlightjsdir: modules/ROOT/assets/highlight
+    highlightjs-theme: railscasts
+  sourcemap: true
+urls:
+  latest_version_segment: ''
+runtime:
+  log:
+    failure_level: warn
+    format: pretty
+ui:
+  bundle:
+    url: https://github.com/reactor/antora-ui-projectreactor/releases/download/latest/ui-bundle.zip
+    snapshot: true
